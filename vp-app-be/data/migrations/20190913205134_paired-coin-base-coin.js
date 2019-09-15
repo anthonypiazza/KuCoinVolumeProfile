@@ -17,18 +17,13 @@ exports.up = function(knex) {
                 .inTable('paired_coin')
                 .onUpdate('CASCADE')
                 .onDelete('CASCADE');      
-            tbl.float('range')
-                .notNullable();
-            tbl.float('step')
-                .notNullable();
             tbl.float('va_high');
             tbl.float('va_low');
-            tbl.float('current_price')
         })
   };
   
-  exports.down = function(knex) {
-      return knex.schema
-      .dropTableIfExists('paired_base')
-  };
+exports.down = function(knex) {
+    return knex.schema
+        .dropTableIfExists('paired_base')
+};
   
