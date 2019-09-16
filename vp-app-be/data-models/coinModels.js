@@ -6,7 +6,7 @@ module.exports = {
 }
 
 function getCoinById(period, base, paired){
-    Axios.get(`https://api.kucoin.com/api/v1/market/candles?type=${period}&symbol=${base}-${paired}&startAt=0&endAt=900000000000000000`)
+    return Axios.get(`https://api.kucoin.com/api/v1/market/candles?type=${period}&symbol=${base}-${paired}&startAt=0&endAt=900000000000000000`)
     .then(result => {
         
         const getHeikinData = (arr) => {
@@ -126,7 +126,6 @@ function getCoinById(period, base, paired){
         console.log('Value Area Low Price: ','$', findValueAreaLow(stepsWithVol))  
         console.log('------------------------------------------------------------')      
         console.log('Value Area High Price: ','$',findValueAreaHigh(stepsWithVol))
-
         return db('base_coin')
             .insert({ name: base })
             .then(baseID => {
@@ -134,13 +133,13 @@ function getCoinById(period, base, paired){
                     .insert({ name: paired })
                     .then(pairedID => {
                         return db('paired_base')
-                            .insert({ base_coin_id: baseID, paired_coin_id: pairedID, va_high: va_price_high, va_low: va_price_low })
+                            .insert({ base_coin_id: baseID[0], paired_coin_id: pairedID[0], va_high: va_price_high, va_low: va_price_low })
                             .then(pb_id => {
                                 return db('base_coin')
-                                // .select('paired_base.id', 'base_coin.name as base_name', 'paired_coin.name as paired_name', 'paired_base.va_high', 'paired_base.va_low')
-                                // .join('paired_base', 'base_coin.id', 'paired_base.base_coin_id')
-                                // .join('paired_coin', 'paired_base.paired_coin_id', 'paired_coin.id')
-                                // .where('base_name', '=', base)
+                                .select('paired_base.id', 'base_coin.name as base_name', 'paired_coin.name as paired_name', 'paired_base.va_high', 'paired_base.va_low')
+                                .join('paired_base', 'base_coin.id', 'paired_base.base_coin_id')
+                                .join('paired_coin', 'paired_base.paired_coin_id', 'paired_coin.id')
+                                .where('base_coin_id', '=', baseID[0])
                             })
                     })
             })
@@ -154,4 +153,5 @@ function getCoinById(period, base, paired){
     .catch(err => {
         console.log(err)
     })
+    // return result
 }
